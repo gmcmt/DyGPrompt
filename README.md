@@ -1,5 +1,4 @@
-# DyGPrompt
-We provide the code (in pytorch) for our paper "Node-Time Conditional Promot Learning in Dynamic Graphs" for anonymous review and testing.
+We provide the code (in pytorch) for our paper "DyGPrompt: Learning Feature and Time Prompts on Dynamic Graphs".
 
 ## Description
 
@@ -40,13 +39,15 @@ Default dataset is WIKIPEDIA. You need to change the corresponding parameters in
 Pretrain:
 
 ```{bash}
-python pretrain_origi.py --use_memory
+python pretrain_origi.py --use_memory --prefix TGN
+python -u pretrain.py -d wikipedia --bs 200 --uniform  --n_degree 20 --agg_method attn --attn_mode prod --gpu 0 --n_head 2 --prefix TGAT
 ```
 
 Prompt tune and test:
 
 ```{bash}
-python downstream_link_fewshot.py --use_memory
+python downstream_link_fewshot.py --use_memory --prefix TGN
+python -u downstream_link_meta.py -d wikipedia --bs 512 --uniform  --n_degree 20 --agg_method attn --attn_mode prod --gpu 0 --n_head 2 --prefix TGAT --name TGAT_LINK --fn saved
 ```
 
 ### Node Classification
@@ -55,6 +56,7 @@ Default dataset is WIKIPEDIA. You need to change the corresponding parameters in
 
 Prompt tune and test:
 
-    python downstream_meta.py --use_memory
-
-
+```{bash}
+    python downstream_meta.py --use_memory --prefix TGN
+    python -u node_task_meta.py -d genre --bs 100 --uniform  --n_degree 20 --agg_method attn --attn_mode prod --gpu 0 --n_head 2 --prefix TGAT
+```
