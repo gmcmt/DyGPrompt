@@ -32,31 +32,82 @@ python downstream_process.py
 
 ## Running experiments
 
-### Link Prediction
-
 Default dataset is WIKIPEDIA. You need to change the corresponding parameters in pretrain\_origi.py and  downstream\_link\_fewshot.py to train and evaluate on other datasets.
 
-Pretrain:
+### DyGPrompt
+
+Pre-train:
+
+```{bash}
+python pretrain_origi.py --use_memory --prefix TGN_DYG
+```
+
+Prompt tuning and test:
+
+```{bash}
+python downstream_link_fewshot.py --use_memory --prefix TGN_DYG
+python downstream_meta.py --use_memory --prefix TGN_DYG
+```
+
+### TGN
+
+Pre-train:
 
 ```{bash}
 python pretrain_origi.py --use_memory --prefix TGN
+```
+
+Prompt tuning and test:
+
+```{bash}
+python downstream_link_tgn.py --use_memory --prefix TGN
+python downstream_meta_tgn.py --use_memory --prefix TGN
+```
+
+### TGAT
+
+Pre-train:
+
+```{bash}
 python -u pretrain.py -d wikipedia --bs 200 --uniform  --n_degree 20 --agg_method attn --attn_mode prod --gpu 0 --n_head 2 --prefix TGAT
 ```
 
-Prompt tune and test:
+Prompt tuning and test:
 
 ```{bash}
-python downstream_link_fewshot.py --use_memory --prefix TGN
 python -u downstream_link_meta.py -d wikipedia --bs 512 --uniform  --n_degree 20 --agg_method attn --attn_mode prod --gpu 0 --n_head 2 --prefix TGAT --name TGAT_LINK --fn saved
+python -u node_task_meta.py -d genre --bs 100 --uniform  --n_degree 20 --agg_method attn --attn_mode prod --gpu 0 --n_head 2 --prefix TGAT
 ```
 
-### Node Classification
 
-Default dataset is WIKIPEDIA. You need to change the corresponding parameters in downstream\_meta.py to train and evaluate on other datasets.
 
-Prompt tune and test:
 
-```{bash}
-    python downstream_meta.py --use_memory --prefix TGN
-    python -u node_task_meta.py -d genre --bs 100 --uniform  --n_degree 20 --agg_method attn --attn_mode prod --gpu 0 --n_head 2 --prefix TGAT
-```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
