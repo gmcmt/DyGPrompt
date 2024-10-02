@@ -32,7 +32,7 @@ python downstream_process.py
 
 ## Running experiments
 
-Default dataset is WIKIPEDIA. You need to change the corresponding parameters in pretrain\_origi.py and  downstream\_link\_fewshot.py to train and evaluate on other datasets.
+Default dataset is Wikipedia. You need to change the corresponding parameters in pretrain\_origi.py and  downstream\_link\_fewshot.py to train and evaluate on other datasets.
 
 ### DyGPrompt
 
