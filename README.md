@@ -1,5 +1,5 @@
 # DyGPrompt
-We provide the code (in pytorch) for our paper "NODE-TIME Conditional Promot Learning in Dynamic Graphs" for anonymous review and testing.
+We provide the code (in pytorch) for our paper "Node-Time Conditional Promot Learning in Dynamic Graphs" for anonymous review and testing.
 
 ## Description
 
