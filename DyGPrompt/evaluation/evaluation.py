@@ -140,39 +140,96 @@ from sklearn.metrics import f1_score,precision_score
 #       auc_roc = roc_auc_score(data.labels, pred_prob)
 #       f1 = f1_score(data.labels, pred_label, average='binary')
 #       return auc_roc,acc,f1
-def eval_node_classification(tgn, decoder, data, edge_idxs, batch_size, n_neighbors):
-  pred_prob = np.zeros(len(data.sources))
-  num_instance = len(data.sources)
-  num_batch = math.ceil(num_instance / batch_size)
+# def eval_node_classification(tgn, decoder, data, edge_idxs, batch_size, n_neighbors):
+#   pred_prob = np.zeros(len(data.sources))
+#   num_instance = len(data.sources)
+#   num_batch = math.ceil(num_instance / batch_size)
 
+#   with torch.no_grad():
+#     decoder.eval()
+#     tgn.eval()
+#     for k in range(num_batch):
+#       s_idx = k * batch_size
+#       e_idx = min(num_instance, s_idx + batch_size)
+
+#       sources_batch = data.sources[s_idx: e_idx]
+#       destinations_batch = data.destinations[s_idx: e_idx]
+#       timestamps_batch = data.timestamps[s_idx:e_idx]
+#       edge_idxs_batch = edge_idxs[s_idx: e_idx]
+
+#       source_embedding, destination_embedding, _ = tgn.compute_temporal_embeddings(sources_batch,
+#                                                                                    destinations_batch,
+#                                                                                    destinations_batch,
+#                                                                                    timestamps_batch,
+#                                                                                    edge_idxs_batch,
+#                                                                                    n_neighbors)
+#       pred_prob_batch = decoder(source_embedding).sigmoid()
+#       pred_prob[s_idx: e_idx] = pred_prob_batch.cpu().numpy()
+
+#   auc_roc = roc_auc_score(data.labels, pred_prob)
+#   pred_label = pred_prob > 0.5
+#   f1 = f1_score(data.labels, pred_label, average='binary')
+#   acc = (pred_label == data.labels).mean()
+
+
+#   return auc_roc,acc,f1
+def eval_node_classification(tgn, decoder, data, edge_idxs,shot_num, n_neighbors):
+  bs = None
   with torch.no_grad():
     decoder.eval()
     tgn.eval()
-    for k in range(num_batch):
-      s_idx = k * batch_size
-      e_idx = min(num_instance, s_idx + batch_size)
+    if shot_num:
+      indices_1 = random.sample(range(0, 10),shot_num)
+      indices_0 = random.sample(range(10,len(data.sources)),shot_num*5)
+      indices = indices_1 + indices_0
+    else:
+      bs = 500
+    if not bs:
+            
+      sources_batch = data.sources[indices]
+      destinations_batch = data.destinations[indices]
+      timestamps_batch = data.timestamps[indices]
+      edge_idxs_batch = edge_idxs[indices]
+      labels_batch = data.labels[indices]
+      source_embedding, destination_embedding, _ = tgn.compute_temporal_embeddings(sources_batch,destinations_batch,destinations_batch,timestamps_batch,edge_idxs_batch,n_neighbors)
+      
+      lr_prob = decoder(source_embedding).sigmoid()                                                                
+      pred_prob = lr_prob.cpu().numpy()
+      pred_label = pred_prob > 0.5
+      acc = (pred_label == labels_batch).mean()
+      f1 = f1_score(labels_batch, pred_label, average='binary')
+      auc_roc = roc_auc_score(labels_batch, pred_prob)
+      return  auc_roc, acc,f1
+    else:
+      pred_prob = np.zeros(len(data.sources))
 
-      sources_batch = data.sources[s_idx: e_idx]
-      destinations_batch = data.destinations[s_idx: e_idx]
-      timestamps_batch = data.timestamps[s_idx:e_idx]
-      edge_idxs_batch = edge_idxs[s_idx: e_idx]
+      num_instance = len(data.sources)
+      pred_prob = np.zeros(num_instance)
+      num_batch = math.ceil(num_instance / bs)
+      
+      for k in range(num_batch):
+        s_idx = k * bs
+        e_idx = min(num_instance, s_idx + bs)
 
-      source_embedding, destination_embedding, _ = tgn.compute_temporal_embeddings(sources_batch,
-                                                                                   destinations_batch,
-                                                                                   destinations_batch,
-                                                                                   timestamps_batch,
-                                                                                   edge_idxs_batch,
-                                                                                   n_neighbors)
-      pred_prob_batch = decoder(source_embedding).sigmoid()
-      pred_prob[s_idx: e_idx] = pred_prob_batch.cpu().numpy()
-
-  auc_roc = roc_auc_score(data.labels, pred_prob)
-  pred_label = pred_prob > 0.5
-  f1 = f1_score(data.labels, pred_label, average='binary')
-  acc = (pred_label == data.labels).mean()
-
-
-  return auc_roc,acc,f1
+        sources_batch = data.sources[s_idx: e_idx]
+        destinations_batch = data.destinations[s_idx: e_idx]
+        timestamps_batch = data.timestamps[s_idx:e_idx]
+        edge_idxs_batch = edge_idxs[s_idx: e_idx]
+        labels_batch = data.labels[s_idx:e_idx]
+        source_embedding, destination_embedding, _ = tgn.compute_temporal_embeddings(sources_batch,
+                                                                                    destinations_batch,
+                                                                                    destinations_batch,
+                                                                                    timestamps_batch,
+                                                                                    edge_idxs_batch,
+                                                                                    n_neighbors)
+        # src_label = torch.from_numpy(labels_batch).float()
+        lr_prob = decoder(source_embedding).sigmoid()    
+        pred_prob[s_idx:e_idx] = lr_prob.cpu().numpy()
+      pred_label = pred_prob > 0.5
+      acc = (pred_label == data.labels).mean()
+      auc_roc = roc_auc_score(data.labels, pred_prob)
+      f1 = f1_score(data.labels, pred_label, average='binary')
+      return auc_roc,acc,f1
 def eval_node_classification_full(tgn, decoder, data, edge_idxs, batch_size, prompt,n_neighbors):
   pred_prob = np.zeros(len(data.sources))
   num_instance = len(data.sources)
