@@ -1,4 +1,4 @@
-We provide the code (in pytorch) for our paper "Node-Time Conditional Promot Learning in Dynamic Graphs" for anonymous review and testing.
+We provide the code (in pytorch) for our paper "Node-Time Conditional Promot Learning in Dynamic Graphs" accept by ICLR 2025.
 
 ## Description
 
